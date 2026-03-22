@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JetBilet | Türkiye'nin Otobüs Bileti Platformu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-red: #d92328; --dark-blue: #1c2b39; --bg-light: #f3f6f9;
+            --white: #ffffff; --text-main: #333333; --text-gray: #707070;
+            --border-color: #e4e9f0; --accent-blue: #2563eb; --success-green: #27ae60;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05); --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+
+        /* --- HEADER --- */
+        header {
+            background: var(--white); height: 80px; display: flex; justify-content: space-between;
+            align-items: center; padding: 0 10%; border-bottom: 2px solid var(--primary-red);
+            position: sticky; top: 0; z-index: 2000;
+        }
+        .logo-area { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-area i { color: var(--primary-red); font-size: 2rem; }
+        .logo-area span { font-size: 1.8rem; font-weight: 800; color: var(--dark-blue); letter-spacing: -1px; }
+        .logo-area span b { color: var(--primary-red); }
+
+        .nav-menu { display: flex; list-style: none; gap: 20px; align-items: center; }
+        .nav-menu li a { text-decoration: none; color: var(--dark-blue); font-weight: 600; font-size: 0.95rem; cursor: pointer; }
+
+        .user-actions { display: flex; gap: 20px; align-items: center; }
+        .cart-trigger {
+            position: relative; background: var(--bg-light); width: 45px; height: 45px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .cart-count {
+            position: absolute; top: -5px; right: -5px; background: var(--primary-red);
+            color: white; font-size: 11px; width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-weight: bold;
+        }
+
+        #userGreetingArea { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--dark-blue); }
+        .login-btn { border: none; background: none; font-weight: 700; color: var(--primary-red); cursor: pointer; font-size: 0.95rem; }
+
+        /* --- HERO & SEARCH --- */
+        .hero-banner { background: var(--dark-blue); padding: 60px 10% 120px; text-align: center; color: white; }
+        .main-search-container { max-width: 1000px; margin: -80px auto 40px; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-md); padding: 30px; }
+        .search-row { display: grid; grid-template-columns: 1fr 1fr 1fr 180px; gap: 20px; align-items: end; }
+        .input-box { position: relative; }
+        .input-box label { display: block; font-size: 12px; font-weight: 700; color: var(--text-gray); margin-bottom: 8px; text-transform: uppercase; }
+        .input-field { width: 100%; border: 1px solid var(--border-color); padding: 14px 15px 14px 45px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .input-box i { position: absolute; left: 15px; bottom: 17px; color: var(--primary-red); font-size: 1.1rem; }
+        .search-btn { background: var(--success-green); color: white; border: none; height: 52px; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; width: 100%; }
+
+        /* --- TRIP LIST --- */
+        .content-section { padding: 40px 10%; max-width: 1400px; margin: 0 auto; }
+        .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .trip-list { display: flex; flex-direction: column; gap: 15px; }
+        .trip-item { background: var(--white); border: 1px solid var(--border-color); border-radius: 10px; display: grid; grid-template-columns: 180px 1fr 1fr 1fr 150px; align-items: center; padding: 20px; cursor: pointer; }
+        .trip-item:hover { border-color: var(--primary-red); }
+        .comp-logo { font-weight: 800; border-left: 4px solid var(--primary-red); padding-left: 10px; }
+
+        /* --- MODALS & OVERLAY --- */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 5000; }
+        .modal-content { background: white; width: 90%; max-width: 800px; margin: 5vh auto; border-radius: 16px; position: relative; overflow: hidden; animation: slideUp 0.3s; }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+
+        /* SEAT SELECTION */
+        .seat-selection-grid { display: grid; grid-template-columns: 1.5fr 1fr; }
+        .bus-chassis { background: #f0f0f0; padding: 30px; border-radius: 20px; margin: 20px; border: 4px solid #ddd; }
+        .seats-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .seat-item { aspect-ratio: 1; background: var(--white); border: 2px solid #ddd; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; font-weight: 700; }
+        .seat-item.selected { background: var(--success-green); color: white; border-color: #219150; }
+        .seat-item.taken { background: #e0e0e0; cursor: not-allowed; color: #bbb; }
+
+        /* --- SIDE CART --- */
+        .side-cart { position: fixed; right: -450px; top: 0; width: 400px; height: 100%; background: white; z-index: 6000; transition: 0.4s; box-shadow: -10px 0 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
+        .side-cart.active { right: 0; }
+        .cart-header { padding: 25px; background: var(--dark-blue); color: white; display: flex; justify-content: space-between; }
+        .cart-body { flex: 1; overflow-y: auto; padding: 20px; }
+
+        /* LOGIN MODAL SPECIFIC */
+        .login-form { padding: 30px; display: flex; flex-direction: column; gap: 15px; }
+        .login-form input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="#" class="logo-area" onclick="location.reload()">
+            <i class="fas fa-bus-alt"></i>
+            <span>JET<b>BILET</b></span>
+        </a>
+        <nav>
+            <ul class="nav-menu">
+                <li><a onclick="location.reload()">Otobüs Bileti</a></li>
+                <li><a onclick="openModal('myTicketsModal')">Seyahatlerim</a></li>
+            </ul>
+        </nav>
+        <div class="user-actions">
+            <div class="cart-trigger" onclick="toggleCart()">
+                <i class="fas fa-shopping-basket"></i>
+                <div class="cart-count" id="cartBadge">0</div>
+            </div>
+            <div id="userAuthArea">
+                <button class="login-btn" onclick="openModal('loginModal')">Üye Girişi</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-banner">
+        <h1>Türkiye'nin Her Yerine Ucuz Bilet</h1>
+        <p>Hızlı, Güvenli ve Kolay bilet almanın adresi.</p>
+    </section>
+
+    <div class="main-search-container">
+        <div class="search-row">
+            <div class="input-box" onclick="openCityModal('from')">
+                <label>Nereden</label><i class="fas fa-map-marker-alt"></i>
+                <div class="input-field" id="fromDisplay">İstanbul</div>
+            </div>
+            <div class="input-box" onclick="openCityModal('to')">
+                <label>Nereye</label><i class="fas fa-location-arrow"></i>
+                <div class="input-field" id="toDisplay">Ankara</div>
+            </div>
+            <div class="input-box">
+                <label>Gidiş Tarihi</label><i class="fas fa-calendar-alt"></i>
+                <input type="date" class="input-field" value="2024-03-23" style="padding-left: 45px;">
+            </div>
+            <button class="search-btn" onclick="performSearch()">Bileti Bul</button>
+        </div>
+    </div>
+
+    <section class="content-section">
+        <div class="list-header">
+            <h2 id="resultHeader">Popüler Seferler</h2>
+            <button class="search-btn" style="width:auto; padding:0 20px;" id="allViewBtn" onclick="showAllTrips()">Tümünü Gör</button>
+        </div>
+        <div class="trip-list" id="mainTripList"></div>
+    </section>
+
+    <div id="loginModal" class="overlay">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Üye Girişi</h3>
+                <i class="fas fa-times" style="cursor:pointer;" onclick="closeModal('loginModal')"></i>
+            </div>
+            <div class="login-form">
+                <label style="font-size: 0.8rem; font-weight: bold;">Adınız Soyadınız</label>
+                <input type="text" id="loginName" placeholder="Örn: Ahmet Yılmaz">
+                <label style="font-size: 0.8rem; font-weight: bold;">Şifre</label>
+                <input type="password" placeholder="******">
+                <button class="search-btn" onclick="handleLogin()">Giriş Yap</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="seatModal" class="overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h3 id="seatModalTitle">Koltuk Seçimi</h3><i class="fas fa-times" style="cursor:pointer;" onclick="closeModal('seatModal')"></i></div>
+            <div class="seat-selection-grid">
+                <div class="bus-chassis"><div class="seats-container" id="busSeats"></div></div>
+                <div style="padding: 30px; background: #fafafa; border-left: 1px solid #eee;">
+                    <h4 id="sumCompany" style="color:var(--primary-red)">Firma</h4>
+                    <p id="sumRoute" style="font-size:0.8rem; margin-bottom:20px;">Rota</p>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Koltuklar:</span><span id="selectedSeatsLabel">-</span></div>
+                    <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1.2rem; color:var(--success-green);"><span>Toplam:</span><span id="sumTotalLabel">0 TL</span></div>
+                    <button class="search-btn" style="margin-top:20px;" onclick="addCurrentSelectionToCart()">SEPETE EKLE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="myTicketsModal" class="overlay">
+        <div class="modal-content"><div class="modal-header"><h3>Biletlerim</h3><i class="fas fa-times" style="cursor:pointer;" onclick="closeModal('myTicketsModal')"></i></div><div id="ticketListArea" style="padding:20px;"></div></div>
+    </div>
+
+    <div id="sideCart" class="side-cart">
+        <div class="cart-header"><h3>Sepetim</h3><i class="fas fa-times" style="cursor:pointer;" onclick="toggleCart()"></i></div>
+        <div class="cart-body" id="cartContent"></div>
+        <div style="padding:25px; border-top:1px solid #eee;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:bold; font-size:1.3rem;"><span>Toplam:</span><span id="cartTotalText">0 TL</span></div>
+            <button class="search-btn" onclick="finalizePayment()">Ödemeyi Tamamla</button>
+        </div>
+    </div>
+
+    <div id="cityModal" class="overlay"><div class="modal-content" style="max-width:400px;"><div class="modal-header"><h3>Şehir Seçin</h3><i class="fas fa-times" style="cursor:pointer;" onclick="closeModal('cityModal')"></i></div><div id="cityListArea" style="padding:10px; max-height:400px; overflow-y:auto;"></div></div></div>
+
+    <script>
+        const FİRMALAR = ["Kamil Koç", "Metro Turizm", "Pamukkale", "Varan", "Ali Osman Ulusoy", "Nilüfer", "Efe Tur"];
+        const SEHIRLER = ["İstanbul", "Ankara", "İzmir", "Antalya", "Bursa", "Adana", "Konya", "Trabzon"];
+        
+        let state = { searchFrom: "İstanbul", searchTo: "Ankara", activeTrips: [], cart: [], purchasedTickets: [], selectedTrip: null, tempSeats: [], userName: "" };
+
+        window.onload = () => { initBaseTrips(); };
+
+        function initBaseTrips() {
+            for(let i=0; i<6; i++) state.activeTrips.push(createTrip(FİRMALAR[i%7], SEHIRLER[i%8], SEHIRLER[(i+1)%8]));
+            renderTrips();
+        }
+
+        function createTrip(c, f, t) {
+            return { id: Math.random().toString(36).substr(2,9), company: c, from: f, to: t, time: "1"+Math.floor(Math.random()*9)+":00", price: Math.floor(Math.random()*300)+400 };
+        }
+
+        // --- AUTH FONKSİYONU ---
+        function handleLogin() {
+            const name = document.getElementById('loginName').value;
+            if(!name) { alert("Lütfen bir isim girin!"); return; }
+            
+            state.userName = name;
+            document.getElementById('userAuthArea').innerHTML = `
+                <div id="userGreetingArea">
+                    <i class="fas fa-user-circle" style="color:var(--primary-red); font-size:1.2rem;"></i>
+                    <span>Hoş geldin, <b>${name}</b></span>
+                    <i class="fas fa-sign-out-alt" onclick="location.reload()" style="cursor:pointer; margin-left:10px; color:var(--text-gray);" title="Çıkış Yap"></i>
+                </div>
+            `;
+            closeModal('loginModal');
+        }
+
+        function renderTrips() {
+            document.getElementById('mainTripList').innerHTML = state.activeTrips.map(t => `
+                <div class="trip-item" onclick="openSeatSelection('${t.id}')">
+                    <div class="comp-logo">${t.company}</div>
+                    <div><div style="font-size:1.4rem; font-weight:800;">${t.time}</div><div style="color:var(--text-gray)">${t.from} > ${t.to}</div></div>
+                    <div style="color:var(--text-gray); font-size:0.8rem;">2+1 Konfor Seferi</div>
+                    <div style="font-size:1.5rem; font-weight:800; color:var(--primary-red); text-align:right;">${t.price} TL</div>
+                    <button class="search-btn" style="height:40px;">Seç</button>
+                </div>
+            `).join('');
+        }
+
+        function showAllTrips() {
+            state.activeTrips = [];
+            for(let i=0; i<20; i++) state.activeTrips.push(createTrip(FİRMALAR[i%7], state.searchFrom, state.searchTo));
+            state.activeTrips.sort((a,b)=>a.time.localeCompare(b.time));
+            document.getElementById('allViewBtn').style.display='none';
+            renderTrips();
+        }
+
+        function performSearch() {
+            state.activeTrips = [];
+            for(let i=0; i<10; i++) state.activeTrips.push(createTrip(FİRMALAR[i%7], state.searchFrom, state.searchTo));
+            renderTrips();
+            window.scrollTo({top: 500, behavior:'smooth'});
+        }
+
+        function openSeatSelection(id) {
+            const t = state.activeTrips.find(x=>x.id===id);
+            state.selectedTrip = t; state.tempSeats = [];
+            document.getElementById('sumCompany').innerText = t.company;
+            document.getElementById('sumTotalLabel').innerText = "0 TL";
+            const sc = document.getElementById('busSeats'); sc.innerHTML = '';
+            for(let i=1; i<=30; i++) {
+                const s = document.createElement('div'); s.className = 'seat-item'; s.innerText = i;
+                if(Math.random()<0.2) s.classList.add('taken');
+                else s.onclick = () => { s.classList.toggle('selected'); s.classList.contains('selected') ? state.tempSeats.push(i) : state.tempSeats = state.tempSeats.filter(x=>x!==i); updateSummary(); };
+                sc.appendChild(s);
+            }
+            openModal('seatModal');
+        }
+
+        function updateSummary() {
+            document.getElementById('selectedSeatsLabel').innerText = state.tempSeats.join(',') || '-';
+            document.getElementById('sumTotalLabel').innerText = (state.tempSeats.length * state.selectedTrip.price) + " TL";
+        }
+
+        function addCurrentSelectionToCart() {
+            if(!state.tempSeats.length) return;
+            state.cart.push({ cartId: Date.now(), trip: state.selectedTrip, seats: [...state.tempSeats], total: state.tempSeats.length * state.selectedTrip.price });
+            updateCartUI(); closeModal('seatModal'); toggleCart(true);
+        }
+
+        function updateCartUI() {
+            const c = document.getElementById('cartContent');
+            document.getElementById('cartBadge').innerText = state.cart.length;
+            let total = 0;
+            c.innerHTML = state.cart.map(i => { total += i.total; return `<div style="background:#f9f9f9; padding:10px; margin-bottom:10px; border-radius:8px;"><b>${i.trip.company}</b><br><small>${i.trip.from} > ${i.trip.to}</small><br><b>${i.total} TL</b></div>`; }).join('');
+            document.getElementById('cartTotalText').innerText = total + " TL";
+        }
+
+        function finalizePayment() {
+            if(!state.cart.length) return;
+            state.cart.forEach(i => state.purchasedTickets.push({ pnr: "JET"+Math.floor(Math.random()*99999), details: i }));
+            state.cart = []; updateCartUI(); toggleCart(false); alert("Ödeme Başarılı!"); renderTickets();
+        }
+
+        function renderTickets() {
+            const a = document.getElementById('ticketListArea');
+            a.innerHTML = state.purchasedTickets.length ? state.purchasedTickets.map(t => `<div style="border:2px dashed #ddd; padding:15px; margin-bottom:10px;">PNR: <b>${t.pnr}</b><br>${t.details.trip.company} | Koltuk: ${t.details.seats}</div>`).join('') : "Bilet yok.";
+        }
+
+        function openCityModal(type) {
+            document.getElementById('cityListArea').innerHTML = SEHIRLER.map(c => `<div style="padding:15px; border-bottom:1px solid #eee; cursor:pointer;" onclick="setCity('${type}','${c}')">${c}</div>`).join('');
+            openModal('cityModal');
+        }
+        function setCity(t, v) { if(t==='from'){ state.searchFrom=v; document.getElementById('fromDisplay').innerText=v;} else {state.searchTo=v; document.getElementById('toDisplay').innerText=v;} closeModal('cityModal');}
+        function openModal(id) { document.getElementById(id).style.display='block'; }
+        function closeModal(id) { document.getElementById(id).style.display='none'; }
+        function toggleCart(f) { const c = document.getElementById('sideCart'); f === true ? c.classList.add('active') : (f === false ? c.classList.remove('active') : c.classList.toggle('active')); }
+    </script>
+</body>
+</html>
